@@ -5,7 +5,7 @@ from sklearn import metrics
 from smart_open import open
 import pickle
 
-class ClassifierFindU:
+class ClassifierSalutem:
     def __init__(self, values, label, algor, user_id):
         self.S3_PATH = os.environ['s3_path_model']
         print(self.knn_classifier(values, label, 3, algor, user_id))
