@@ -2,8 +2,8 @@ import os
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn import metrics
-from smart_open import open
-import pickle
+# from smart_open import open
+# import pickle
 
 class ClassifierSalutem:
     def __init__(self, values, label, algor, user_id):

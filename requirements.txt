@@ -1,5 +1,3 @@
-numpy
 pymongo
-dnspython
-smart_open
 sklearn
+dnspython

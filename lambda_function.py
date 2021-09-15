@@ -1,39 +1,43 @@
-import json
+from bson import json_util, ObjectId
 from mongo_handler import MongoConnection
-import os
+
+import json
 import main
 import clustering
 
 def lambda_handler(event, context):
     
-    request = eval(event['body'])
-    print(request)
+    request = event['body']
     
     mongo_h = MongoConnection()
-    print(mongo_h.info())
 
-    dataset, id_str = mongo_h.get_collection('user')
+    dataset = mongo_h.get_collection('users')
 
     otherUsers = main.removeUserId(request['userId'], dataset)
-    user = main.onlyById(request['userId'], dataset)
-
-    #otherUsers = main.removeUserWithoutInfo(otherUsers)
-
-    otherUsers = main.removeUnnecessaryProperty(otherUsers)
-    user = main.removeUnnecessaryProperty(user)
 
     otherUsersKnn = clustering.transformToKnnArray(otherUsers)
-    userKnn = clustering.transformToKnnArray(user)
+    print(f"Other users array: {otherUsersKnn}")
 
-    result = clustering.knn(userKnn, otherUsersKnn, k=4)
+    userKnn = [[
+        request['filters']['spec'],
+        request['filters']['insurance'],
+        request['filters']['location']['coordinates']['lat'],
+        request['filters']['location']['coordinates']['long']
+        ]]
 
-    usersByKnn = clustering.getUsersByKnnDoctor(otherUsers, result[0])
-    print(usersByKnn)
+    try:
+        result = clustering.knn(userKnn, otherUsersKnn, k=4)
 
-    return {
-        'statusCode': 200,
-        'body': json.dumps({'result':usersByKnn})
-    }
+        usersByKnn = clustering.getUsersByKnnDoctor(otherUsers, result[0])
+        print(f"Recommender result: {usersByKnn}")
 
-    #cluster = ClusterSalutem(id_str, dataset)
-    #cluster.run_cluster()
+        return {
+            'statusCode': 200,
+            'body': json.loads(json_util.dumps(usersByKnn))
+        }
+    except Exception as e:
+        print(f"Clustering exception: {e}")
+        return {
+            'statusCode': 400,
+            'body': json.dumps({'error':e})
+        }

@@ -1,5 +1,3 @@
-import requests
-import json
 from types import SimpleNamespace as Namespace
 
 def removeUserWithoutInfo(data, info):
@@ -23,8 +21,8 @@ def removeUnnecessaryProperty(data):
 def removeUserId(id, data):
     temp = []
     for i in range(len(data)):
-        if hasattr(data[i], '_id'):
-            if data[i]._id != id:
+        if data[i].get('_id'):
+            if not id in str(data[i]['_id']):
                 temp.append(data[i])
     return temp
 
@@ -32,7 +30,7 @@ def onlyById(id, data):
     temp = []
     for i in range(len(data)):
         if hasattr(data[i], '_id'):
-            if data[i]._id == id:
+            if data[i]._id in id:
                 temp.append(data[i])
     return temp
 
