@@ -6,24 +6,41 @@ import main
 import clustering
 
 def lambda_handler(event, context):
+
+    print(f"Lambda event: {event}")
     
-    request = event['body']
-    
-    mongo_h = MongoConnection()
+    request = eval(event['body']) if event.get('headers') else event['body']
+    print(f"Request body: {request}")
 
-    dataset = mongo_h.get_collection('users')
+    try:
+        mongo_h = MongoConnection()
+        dataset = mongo_h.get_collection('users')
+    except Exception as e:
+        print(f"Mongo get collection error: {e}")
+        return {
+            'statusCode': 400,
+            'body': json.dumps({'error':e.args})
+        }
 
-    otherUsers = main.removeUserId(request['userId'], dataset)
+    try:
+        otherUsers = main.removeUserId(request['userId'], dataset)
+        print(f"Separated users: {otherUsers}")
 
-    otherUsersKnn = clustering.transformToKnnArray(otherUsers)
-    print(f"Other users array: {otherUsersKnn}")
+        otherUsersKnn = clustering.transformToKnnArray(otherUsers)
+        print(f"Other users array: {otherUsersKnn}")
 
-    userKnn = [[
-        request['filters']['spec'],
-        request['filters']['insurance'],
-        request['filters']['location']['coordinates']['lat'],
-        request['filters']['location']['coordinates']['long']
-        ]]
+        userKnn = [[
+            request['filters']['spec'],
+            request['filters']['insurance'],
+            request['filters']['location']['coordinates']['lat'],
+            request['filters']['location']['coordinates']['long']
+            ]]
+    except Exception as e:
+        print(f"Transformation error: {e}")
+        return {
+            'statusCode': 400,
+            'body': json.dumps({'error':e.args})
+        }
 
     try:
         result = clustering.knn(userKnn, otherUsersKnn, k=4)
@@ -32,12 +49,13 @@ def lambda_handler(event, context):
         print(f"Recommender result: {usersByKnn}")
 
         return {
-            'statusCode': 200,
-            'body': json.loads(json_util.dumps(usersByKnn))
+            "statusCode": 200,
+            "body": json_util.dumps({"data": usersByKnn}),
+            "isBase64Encoded": False
         }
     except Exception as e:
         print(f"Clustering exception: {e}")
         return {
             'statusCode': 400,
-            'body': json.dumps({'error':e})
+            'body': json.dumps({'error':e.args})
         }

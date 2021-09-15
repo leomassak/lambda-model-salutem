@@ -10,6 +10,10 @@ __pycache__/
 #salutem lambda zip
 lamda-salutem.zip
 
+bin
+*/
+threadpoolctl.py
+
 # C extensions
 *.so
 
