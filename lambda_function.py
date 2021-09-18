@@ -32,8 +32,8 @@ def lambda_handler(event, context):
         userKnn = [[
             request['filters']['spec'],
             request['filters']['insurance'],
-            request['filters']['location']['coordinates']['lat'],
-            request['filters']['location']['coordinates']['long']
+            request['filters']['lat'],
+            request['filters']['long']
             ]]
     except Exception as e:
         print(f"Transformation error: {e}")
