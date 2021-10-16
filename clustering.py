@@ -11,7 +11,9 @@ def getUsersByKnnDoctor(otherUsers, result):
             "doctor_info": otherUsers[x]['doctorInfo'],
             "insurance": otherUsers[x]['insurance'],
             "address": otherUsers[x]['adress'],
-            "location": otherUsers[x]['location'],
+            "location": otherUsers[x].get('location'),
+            "phone": otherUsers[x]['phone'],
+            "rate": otherUsers[x].get('rate'),
             "review": otherUsers[x].get('review')
         })
     return temp
@@ -31,12 +33,12 @@ def transformToKnnArray(data):
     temp = []
     for i in range(len(data)):
         if data[i].get('doctorInfo') and data[i].get('insurance') and data[i].get('location'):
-            temp.append([data[i]['doctorInfo']['spec'],data[i]['insurance'][0],data[i]['location']['coordinates'][0],data[i]['location']['coordinates'][1]])
+            temp.append([data[i]['doctorInfo']['spec'] * 4,data[i]['insurance'][0],data[i]['location']['coordinates'][0],data[i]['location']['coordinates'][1]])
     return temp
 
-def knn(user, otherUsers, k):
-    tree = BallTree(otherUsers, leaf_size=30)
-    dist, ind = tree.query(user, k=k)
+def knn(user, otherUsers):
+    tree = BallTree(otherUsers)
+    dist, ind = tree.query(user, k=5)
     
     return ind
 

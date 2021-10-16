@@ -5,6 +5,8 @@ import json
 import main
 import clustering
 
+# from classifier import ClassifierSalutem
+
 def lambda_handler(event, context):
 
     print(f"Lambda event: {event}")
@@ -30,11 +32,15 @@ def lambda_handler(event, context):
         print(f"Other users array: {otherUsersKnn}")
 
         userKnn = [[
-            request['filters']['spec'],
-            request['filters']['insurance'],
-            request['filters']['lat'],
-            request['filters']['long']
+            int(request['filters']['spec']) * 4,
+            int(request['filters']['insurance']),
+            float(request['filters']['lat']),
+            float(request['filters']['long'])
             ]]
+        print(f"user knn array {userKnn}")
+
+        # classifier_result = ClassifierSalutem(otherUsersKnn)
+
     except Exception as e:
         print(f"Transformation error: {e}")
         return {
@@ -43,7 +49,7 @@ def lambda_handler(event, context):
         }
 
     try:
-        result = clustering.knn(userKnn, otherUsersKnn, k=4)
+        result = clustering.knn(userKnn, otherUsersKnn)
 
         usersByKnn = clustering.getUsersByKnnDoctor(otherUsers, result[0])
         print(f"Recommender result: {usersByKnn}")
